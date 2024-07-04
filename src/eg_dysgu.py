@@ -19,7 +19,7 @@ import subprocess
 import time
 
 @dxpy.entry_point('main')
-def main(bams, family_number, sample_number):
+def main(bams, family_number, sample_number, options=None, manta_vcf=None):
     # give permission to run shell script
     os.chmod("/home/dnanexus/run_dysgu.sh", stat.S_IRWXU | stat.S_IRWXG | stat.S_IXOTH)
 
@@ -31,20 +31,37 @@ def main(bams, family_number, sample_number):
     # The following line(s) download your file inputs to the local file system
     # using variable names for the filenames.
 
-    ref = dxpy.describe({"$dnanexus_link": "file-GGVPZGj4fq4jpfZJP3YPBXZ7"})['name']
+    # download bam/bai
     for bam in bams:
         name = dxpy.describe(bam.get_id())['name']
         dxpy.download_dxfile(bam.get_id(), name)
 
+    # download reference
+    ref = dxpy.describe({"$dnanexus_link": "file-GGVPZGj4fq4jpfZJP3YPBXZ7"})['name']
     dxpy.download_dxfile({"$dnanexus_link": "file-GGVPZGj4fq4jpfZJP3YPBXZ7"}, ref)
     dxpy.download_dxfile({"$dnanexus_link": "file-GGZ90104fq4x6G1jKkF6Jz63"}, ref + ".fai")
+
+    # format options
+    if options == None:
+        options = ''
+    else:
+        options = options.strip()
+
+    # download manta vcf
+    if manta_vcf == None:
+        manta_vcf = "empty"
+    else:
+        manta_vcf = dxpy.DXFile(manta_vcf)
+        name = dxpy.describe(manta_vcf.get_id())['name']
+        dxpy.download_dxfile({"$dnanexus_link": "file-GGVPZGj4fq4jpfZJP3YPBXZ7"}, name)
+        manta_vcf = name
 
     # create output file prefix
     sample = f"{family_number.strip().replace(' ', '')}_{sample_number.strip().replace(' ', '')}"
 
     # run manta shell script
     subprocess.run(["/home/dnanexus/run_dysgu.sh",
-        sample
+        sample, options, manta_vcf
     ])
 
     # The following line fills in some basic dummy output and assumes

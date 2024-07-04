@@ -26,6 +26,18 @@
       "class": "string",
       "optional": false,
       "help": ""
+    },
+    {
+      "name": "options",
+      "class": "string",
+      "optional": true,
+      "help": "e.g. --min-size 50 (default 30) --min-support 10 (default 3)"
+    },
+    {
+      "name": "manta_vcf",
+      "class": "file",
+      "optional": true,
+      "help": "<sample_id>.diploidSVs.vcf.gz filell"
     }
   ],
   "outputSpec": [
@@ -41,7 +53,7 @@
   "runSpec": {
     "timeoutPolicy": {
       "*": {
-        "hours": 2
+        "hours": 12
       }
     },
     "interpreter": "python3",
